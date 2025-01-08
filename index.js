@@ -17,9 +17,8 @@ const PORT = 3000;
 app.use(express.json());
 app.use(require('cors')());
 
-const USER_ID = '1006909671908585586'; 
+const USER_ID = '1006909671908585586';
 const GUILD_ID = '1148661284594790400'; 
-
 
 app.get('/status', async (req, res) => {
   try {
@@ -29,22 +28,18 @@ app.get('/status', async (req, res) => {
     const isOnline = member.presence?.status === 'online';
 
     res.json({
-      username: member.user.username,
-      status: isOnline ? 'online' : 'offline',
+      message: `FuncZero está ${isOnline ? 'online' : 'offline'}`,
     });
   } catch (error) {
     console.error('Erro ao obter status do usuário:', error.message);
-    res.status(500).json({ error: 'Erro ao obter status do usuário.' });
+    res.status(500).json({ error: 'Erro ao obter status do usuário' });
   }
 });
 
-
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
-
 
 client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
 });
-
 
 client.login(process.env.DISCORD_TOKEN);
