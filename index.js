@@ -12,11 +12,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
   ],
-  ws: {
-    properties: {
-      $browser: 'Discord Android',
-    },
-  },
 });
 
 const app = express();
@@ -55,16 +50,16 @@ client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
   client.user.setPresence({
-    status: 'online',
+    status: 'dnd',
     activities: [
       {
-        name: 'no celular 📱',
-        type: 'PLAYING',
+        name: 'https://funczero.xyz',
+        type: 'WATCHING',
       },
     ],
   });
 
-  console.log('Status configurado para "Jogando no celular 📱".');
+  console.log('Status do bot configurado para "Assistindo: https://funczero.xyz".');
 });
 
 client.on('messageCreate', async (message) => {
