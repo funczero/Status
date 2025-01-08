@@ -7,7 +7,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildPresences, // Adicionado para acessar presenças
+    GatewayIntentBits.GuildPresences,
   ],
 });
 
@@ -17,10 +17,10 @@ const PORT = 3000;
 app.use(express.json());
 app.use(require('cors')());
 
-const USER_ID = '1006909671908585586'; // Substitua pelo seu ID de usuário
-const GUILD_ID = '1148661284594790400'; // Substitua pelo ID do servidor
+const USER_ID = '1006909671908585586'; 
+const GUILD_ID = '1148661284594790400'; 
 
-// Rota para verificar status
+
 app.get('/status', async (req, res) => {
   try {
     const guild = await client.guilds.fetch(GUILD_ID);
@@ -38,13 +38,13 @@ app.get('/status', async (req, res) => {
   }
 });
 
-// Inicializa o servidor
+
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
-// Evento ready do bot
+
 client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
 });
 
-// Login do bot
+
 client.login(process.env.DISCORD_TOKEN);
