@@ -22,7 +22,7 @@ app.use(require('cors')());
 
 const USER_ID = '1006909671908585586';
 const GUILD_ID = '1148661284594790400';
-const PREFIX = '!';
+const PREFIX = '.';
 
 app.get('/status', async (req, res) => {
   try {
