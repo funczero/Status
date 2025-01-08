@@ -50,19 +50,20 @@ client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
   client.user.setPresence({
-    status: 'online',
+    status: 'dnd',
     activities: [
       {
-        name: 'no celular 📱',
-        type: 'PLAYING',
+        name: 'Monitore status!',
+        type: 'WATCHING', 
       },
     ],
   });
 
-  console.log('Status configurado: "Jogando com FuncZero".');
+  console.log('Status do bot configurado para "Não Perturbe".');
 });
 
 client.on('messageCreate', async (message) => {
+  
   if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
