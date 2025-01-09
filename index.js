@@ -20,14 +20,9 @@ const PORT = 80;
 app.use(express.json());
 app.use(require('cors')());
 
-const USER_ID = '1006909671908585586';
-const GUILD_ID = '1148661284594790400';
 const PREFIX = '.';
 
 function formatUptime(seconds) {
-  const months = Math.floor(seconds / (30 * 24 * 60 * 60));
-  seconds %= 30 * 24 * 60 * 60;
-
   const days = Math.floor(seconds / (24 * 60 * 60));
   seconds %= 24 * 60 * 60;
 
@@ -37,45 +32,26 @@ function formatUptime(seconds) {
   const minutes = Math.floor(seconds / 60);
   seconds = Math.floor(seconds % 60);
 
-  return `${months}m ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-app.get('/status', async (req, res) => {
-  try {
-    const guild = await client.guilds.fetch(GUILD_ID);
-    console.log('Servidor encontrado:', guild.name);
+function generateProgressBar(percentage) {
+  const totalBars = 20;
+  const filledBars = Math.round((percentage / 100) * totalBars);
+  const emptyBars = totalBars - filledBars;
 
-    const member = await guild.members.fetch(USER_ID);
-    console.log('Status do membro:', member.presence?.status);
+  const filled = '█'.repeat(filledBars);
+  const empty = '░'.repeat(emptyBars);
 
-    const isOnline = member.presence?.status === 'online';
-
-    res.json({
-      message: `FuncZero está ${isOnline ? 'online' : 'offline'}`,
-      online: isOnline,
-    });
-  } catch (error) {
-    console.error('Erro ao obter status do usuário:', error.message);
-    res.status(500).json({ error: 'Erro ao obter status do usuário' });
-  }
-});
-
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+  return `${filled}${empty}`;
+}
 
 client.once('ready', () => {
-  console.log(`Bot está online como ${client.user.tag}`);
-  
+  console.log(`Bot online como ${client.user.tag}`);
   client.user.setPresence({
     status: 'dnd',
-    activities: [
-      {
-        name: 'https://funczero.xyz',
-        type: 'WATCHING',
-      },
-    ],
+    activities: [{ name: 'https://funczero.xyz', type: 'WATCHING' }],
   });
-
-  console.log('Status do bot configurado para "Assistindo: https://funczero.xyz".');
 });
 
 client.on('messageCreate', async (message) => {
@@ -97,7 +73,11 @@ client.on('messageCreate', async (message) => {
     const memoryMB = (memoryUsage.heapUsed / 1024 / 1024).toFixed(2);
     const totalMemoryMB = (os.totalmem() / 1024 / 1024).toFixed(2);
 
-    const uptime = formatUptime(process.uptime());
+    const uptimeInSeconds = process.uptime();
+    const uptimeFormatted = formatUptime(uptimeInSeconds);
+
+    const percentage = (uptimeInSeconds % (24 * 60 * 60)) / (24 * 60 * 60) * 100; // Percentual do dia
+    const progressBar = generateProgressBar(percentage);
 
     const embed = {
       color: 0x00ff00,
@@ -108,7 +88,7 @@ client.on('messageCreate', async (message) => {
         { name: 'Uso de CPU', value: `${cpuPercentage}%`, inline: true },
         { name: 'Uso de Memória', value: `${memoryMB}MB / ${totalMemoryMB}MB`, inline: true },
         { name: 'Sistema Operacional', value: `${os.type()} ${os.release()}`, inline: true },
-        { name: 'Uptime do Bot', value: uptime, inline: true },
+        { name: 'Uptime do Bot', value: `${uptimeFormatted}\n${progressBar}`, inline: false },
       ],
       timestamp: new Date(),
     };
