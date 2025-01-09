@@ -22,7 +22,10 @@ app.use(require('cors')());
 
 const PREFIX = '.';
 
-function formatUptime(seconds) {
+function formatUptimeModern(seconds) {
+  const months = Math.floor(seconds / (30 * 24 * 60 * 60));
+  seconds %= 30 * 24 * 60 * 60;
+
   const days = Math.floor(seconds / (24 * 60 * 60));
   seconds %= 24 * 60 * 60;
 
@@ -32,7 +35,7 @@ function formatUptime(seconds) {
   const minutes = Math.floor(seconds / 60);
   seconds = Math.floor(seconds % 60);
 
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  return `${months}M:${days}D:${hours}H:${minutes}m:${seconds}s`;
 }
 
 function generateProgressBar(percentage) {
@@ -74,9 +77,9 @@ client.on('messageCreate', async (message) => {
     const totalMemoryMB = (os.totalmem() / 1024 / 1024).toFixed(2);
 
     const uptimeInSeconds = process.uptime();
-    const uptimeFormatted = formatUptime(uptimeInSeconds);
+    const uptimeFormatted = formatUptimeModern(uptimeInSeconds);
 
-    const percentage = (uptimeInSeconds % (24 * 60 * 60)) / (24 * 60 * 60) * 100; // Percentual do dia
+    const percentage = (uptimeInSeconds % (24 * 60 * 60)) / (24 * 60 * 60) * 100;
     const progressBar = generateProgressBar(percentage);
 
     const embed = {
