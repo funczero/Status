@@ -37,7 +37,7 @@ function formatUptime(seconds) {
   const minutes = Math.floor(seconds / 60);
   seconds = Math.floor(seconds % 60);
 
-  return `${months} meses, ${days} dias, ${hours} horas, ${minutes} minutos e ${seconds} segundos`;
+  return `${months}m ${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
 app.get('/status', async (req, res) => {
