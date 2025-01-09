@@ -24,6 +24,22 @@ const USER_ID = '1006909671908585586';
 const GUILD_ID = '1148661284594790400';
 const PREFIX = '.';
 
+function formatUptime(seconds) {
+  const months = Math.floor(seconds / (30 * 24 * 60 * 60));
+  seconds %= 30 * 24 * 60 * 60;
+
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  seconds %= 24 * 60 * 60;
+
+  const hours = Math.floor(seconds / (60 * 60));
+  seconds %= 60 * 60;
+
+  const minutes = Math.floor(seconds / 60);
+  seconds = Math.floor(seconds % 60);
+
+  return `${months} meses, ${days} dias, ${hours} horas, ${minutes} minutos e ${seconds} segundos`;
+}
+
 app.get('/status', async (req, res) => {
   try {
     const guild = await client.guilds.fetch(GUILD_ID);
@@ -81,6 +97,8 @@ client.on('messageCreate', async (message) => {
     const memoryMB = (memoryUsage.heapUsed / 1024 / 1024).toFixed(2);
     const totalMemoryMB = (os.totalmem() / 1024 / 1024).toFixed(2);
 
+    const uptime = formatUptime(process.uptime());
+
     const embed = {
       color: 0x00ff00,
       title: 'Informações do Sistema',
@@ -90,7 +108,7 @@ client.on('messageCreate', async (message) => {
         { name: 'Uso de CPU', value: `${cpuPercentage}%`, inline: true },
         { name: 'Uso de Memória', value: `${memoryMB}MB / ${totalMemoryMB}MB`, inline: true },
         { name: 'Sistema Operacional', value: `${os.type()} ${os.release()}`, inline: true },
-        { name: 'Uptime do Bot', value: `${(process.uptime() / 60).toFixed(2)} minutos`, inline: true },
+        { name: 'Uptime do Bot', value: uptime, inline: true },
       ],
       timestamp: new Date(),
     };
