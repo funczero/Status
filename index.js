@@ -14,7 +14,7 @@ const client = new Client({
   ],
   ws: {
     properties: {
-      $browser: "Discord Android", // Simula o cliente do Discord em um celular
+      $browser: "Discord Android",
     },
   },
 });
@@ -71,16 +71,16 @@ client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
   client.user.setPresence({
-    status: 'online', // Status online com símbolo de celular verde
+    status: 'online',
     activities: [
       {
         name: 'no celular 📱',
-        type: 'PLAYING', // Mensagem de status personalizada
+        type: 'PLAYING',
       },
     ],
   });
 
-  console.log('Status do bot configurado para "Celular Verde".');
+  console.log('Status configurado como "online no celular".');
 });
 
 client.on('messageCreate', async (message) => {
