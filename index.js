@@ -14,7 +14,8 @@ const client = new Client({
   ],
   ws: {
     properties: {
-      $browser: "Mobile Safari",
+      $browser: "Discord Android",
+      user_agent: "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36", // Simula navegador móvel
     },
   },
 });
@@ -70,19 +71,19 @@ app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
-  console.log("Propriedades do cliente:", client.options.ws.properties);
+  console.log("Configuração atual do WebSocket:", client.options.ws);
 
   client.user.setPresence({
     status: 'online',
     activities: [
       {
-        name: '🎧 Disponível no celular 📱',
+        name: '📱 Usando Discord no celular',
         type: 'PLAYING',
       },
     ],
   });
 
-  console.log('Status configurado como "online no celular".');
+  console.log('Status configurado como "Simulando celular verde".');
 });
 
 client.on('messageCreate', async (message) => {
