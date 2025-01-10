@@ -1,23 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const { Client, GatewayIntentBits, MessageEmbed } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const os = require('os');
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
   ],
-  ws: {
-    properties: {
-      $browser: "Discord Android",
-      user_agent: "Mozilla/5.0 (Linux; Android 12; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36",
-    },
-  },
 });
 
 const app = express();
@@ -26,6 +20,8 @@ const PORT = 80;
 app.use(express.json());
 app.use(require('cors')());
 
+const USER_ID = '1006909671908585586';
+const GUILD_ID = '1148661284594790400';
 const PREFIX = '.';
 
 function formatUptime(seconds) {
@@ -41,66 +37,52 @@ function formatUptime(seconds) {
   const minutes = Math.floor(seconds / 60);
   seconds = Math.floor(seconds % 60);
 
-  return `${months}M ${days}D ${hours}H ${minutes}m ${seconds}s`;
+  return `${months} mese(s), ${days} dia(s), ${hours} hora(s), ${minutes} minuto(s) e ${seconds} segundos`;
 }
 
+app.get('/status', async (req, res) => {
+  try {
+    const guild = await client.guilds.fetch(GUILD_ID);
+    console.log('Servidor encontrado:', guild.name);
+
+    const member = await guild.members.fetch(USER_ID);
+    console.log('Status do membro:', member.presence?.status);
+
+    const isOnline = member.presence?.status === 'online';
+
+    res.json({
+      message: `FuncZero está ${isOnline ? 'online' : 'offline'}`,
+      online: isOnline,
+    });
+  } catch (error) {
+    console.error('Erro ao obter status do usuário:', error.message);
+    res.status(500).json({ error: 'Erro ao obter status do usuário' });
+  }
+});
+
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+
+client.once('ready', () => {
+  console.log(`Bot está online como ${client.user.tag}`);
+  
+  client.user.setPresence({
+    status: 'dnd',
+    activities: [
+      {
+        name: 'https://funczero.xyz',
+        type: 'WATCHING',
+      },
+    ],
+  });
+
+  console.log('Status do bot configurado para "Assistindo: https://funczero.xyz".');
+});
+
 client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
+  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
-
-  if (command === 'sorteio') {
-    if (!message.member.permissions.has('MANAGE_MESSAGES')) {
-      return message.reply('Você não tem permissão para iniciar sorteios!');
-    }
-
-    const duration = args[0];
-    const prize = args.slice(1).join(' ');
-
-    if (!duration || !prize) {
-      return message.reply(
-        'Uso: `.sorteio <duração> <prêmio>`\nExemplo: `.sorteio 1m Gift Card R$50`'
-      );
-    }
-
-    const durationMs = parseDuration(duration);
-    if (!durationMs) {
-      return message.reply('Duração inválida! Use formatos como: 10s, 1m, 1h.');
-    }
-
-    const embed = new MessageEmbed()
-      .setTitle('🎉 Sorteio!')
-      .setDescription(`Reaja com 🎉 para participar!\n**Prêmio:** ${prize}`)
-      .addField('Tempo Restante', formatDuration(durationMs))
-      .setFooter('Sorteio criado por ' + message.author.username)
-      .setColor('GREEN');
-
-    const giveawayMessage = await message.channel.send({ embeds: [embed] });
-    await giveawayMessage.react('🎉');
-
-    setTimeout(async () => {
-      const fetchedMessage = await message.channel.messages.fetch(
-        giveawayMessage.id
-      );
-
-      const reactions = fetchedMessage.reactions.cache.get('🎉');
-      if (!reactions || reactions.count <= 1) {
-        return message.channel.send(
-          `❌ Sorteio cancelado, pois ninguém participou.`
-        );
-      }
-
-      const users = await reactions.users.fetch();
-      const participants = users.filter((u) => !u.bot).map((u) => u);
-
-      const winner = participants[Math.floor(Math.random() * participants.length)];
-
-      message.channel.send(
-        `🎉 Parabéns ${winner}! Você ganhou: **${prize}**`
-      );
-    }, durationMs);
-  }
 
   if (command === 'ping') {
     const msg = await message.channel.send('Calculando...');
@@ -125,6 +107,7 @@ client.on('messageCreate', async (message) => {
         { name: 'Latência', value: `${latency}ms`, inline: true },
         { name: 'Uso de CPU', value: `${cpuPercentage}%`, inline: true },
         { name: 'Uso de Memória', value: `${memoryMB}MB / ${totalMemoryMB}MB`, inline: true },
+        { name: 'Sistema Operacional', value: `${os.type()} ${os.release()}`, inline: true },
         { name: 'Uptime do Bot', value: uptime, inline: true },
       ],
       timestamp: new Date(),
@@ -134,36 +117,4 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-function parseDuration(duration) {
-  const match = duration.match(/^(\d+)(s|m|h|d)$/);
-  if (!match) return null;
-
-  const value = parseInt(match[1]);
-  const unit = match[2];
-
-  switch (unit) {
-    case 's':
-      return value * 1000;
-    case 'm':
-      return value * 60 * 1000;
-    case 'h':
-      return value * 60 * 60 * 1000;
-    case 'd':
-      return value * 24 * 60 * 60 * 1000;
-    default:
-      return null;
-  }
-}
-
-// Função para formatar a duração
-function formatDuration(ms) {
-  const seconds = Math.floor((ms / 1000) % 60);
-  const minutes = Math.floor((ms / (1000 * 60)) % 60);
-  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
-
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 client.login(process.env.TOKEN);
