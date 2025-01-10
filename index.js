@@ -14,7 +14,7 @@ const client = new Client({
   ],
   ws: {
     properties: {
-      $browser: "Discord Android",
+      $browser: "Mobile Safari",
     },
   },
 });
@@ -70,11 +70,13 @@ app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
+  console.log("Propriedades do cliente:", client.options.ws.properties);
+
   client.user.setPresence({
     status: 'online',
     activities: [
       {
-        name: 'no celular 📱',
+        name: '🎧 Disponível no celular 📱',
         type: 'PLAYING',
       },
     ],
