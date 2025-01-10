@@ -12,6 +12,11 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
   ],
+  ws: {
+    properties: {
+      $browser: "Discord Android", // Simula o cliente do Discord em um celular
+    },
+  },
 });
 
 const app = express();
@@ -66,16 +71,16 @@ client.once('ready', () => {
   console.log(`Bot está online como ${client.user.tag}`);
   
   client.user.setPresence({
-    status: 'dnd',
+    status: 'online', // Status online com símbolo de celular verde
     activities: [
       {
-        name: 'https://funczero.xyz',
-        type: 'WATCHING',
+        name: 'no celular 📱',
+        type: 'PLAYING', // Mensagem de status personalizada
       },
     ],
   });
 
-  console.log('Status do bot configurado para "Assistindo: https://funczero.xyz".');
+  console.log('Status do bot configurado para "Celular Verde".');
 });
 
 client.on('messageCreate', async (message) => {
