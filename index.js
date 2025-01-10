@@ -15,7 +15,8 @@ const client = new Client({
   ws: {
     properties: {
       $browser: "Discord Android",
-      user_agent: "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Mobile Safari/537.36", // Simula navegador móvel
+      user_agent:
+        "Mozilla/5.0 (Linux; Android 12; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36", // Simula um navegador Android moderno
     },
   },
 });
@@ -26,8 +27,6 @@ const PORT = 80;
 app.use(express.json());
 app.use(require('cors')());
 
-const USER_ID = '1006909671908585586';
-const GUILD_ID = '1148661284594790400';
 const PREFIX = '.';
 
 function formatUptime(seconds) {
@@ -43,35 +42,13 @@ function formatUptime(seconds) {
   const minutes = Math.floor(seconds / 60);
   seconds = Math.floor(seconds % 60);
 
-  return `${months} mese(s), ${days} dia(s), ${hours} hora(s), ${minutes} minuto(s) e ${seconds} segundos`;
+  return `${months}M ${days}D ${hours}H ${minutes}m ${seconds}s`;
 }
 
-app.get('/status', async (req, res) => {
-  try {
-    const guild = await client.guilds.fetch(GUILD_ID);
-    console.log('Servidor encontrado:', guild.name);
-
-    const member = await guild.members.fetch(USER_ID);
-    console.log('Status do membro:', member.presence?.status);
-
-    const isOnline = member.presence?.status === 'online';
-
-    res.json({
-      message: `FuncZero está ${isOnline ? 'online' : 'offline'}`,
-      online: isOnline,
-    });
-  } catch (error) {
-    console.error('Erro ao obter status do usuário:', error.message);
-    res.status(500).json({ error: 'Erro ao obter status do usuário' });
-  }
-});
-
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
-
 client.once('ready', () => {
-  console.log(`Bot está online como ${client.user.tag}`);
-  
-  console.log("Configuração atual do WebSocket:", client.options.ws);
+  console.log(`Bot online como ${client.user.tag}`);
+
+  console.log("Configuração do WebSocket:", client.options.ws.properties);
 
   client.user.setPresence({
     status: 'online',
@@ -115,8 +92,7 @@ client.on('messageCreate', async (message) => {
         { name: 'Latência', value: `${latency}ms`, inline: true },
         { name: 'Uso de CPU', value: `${cpuPercentage}%`, inline: true },
         { name: 'Uso de Memória', value: `${memoryMB}MB / ${totalMemoryMB}MB`, inline: true },
-        { name: 'Sistema Operacional', value: `${os.type()} ${os.release()}`, inline: true },
-        { name: 'Uptime do Bot', value: uptime, inline: true },
+        { name: 'Uptime do Bot', value: uptime, inline: false },
       ],
       timestamp: new Date(),
     };
@@ -124,5 +100,7 @@ client.on('messageCreate', async (message) => {
     msg.edit({ content: null, embeds: [embed] });
   }
 });
+
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
 client.login(process.env.TOKEN);
