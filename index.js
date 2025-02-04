@@ -12,50 +12,47 @@ const client = new Client({
 });
 
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(require('cors')());
 
-const USER_ID = process.env.USER_ID;
-const GUILD_ID = process.env.GUILD_ID;
+const USER_ID = process.env.DISCORD_USER_ID;
+const GUILD_ID = process.env.DISCORD_GUILD_ID;
 
 app.get('/status', async (req, res) => {
   try {
+    console.log(`[INFO] Solicitando status de ${USER_ID} no servidor ${GUILD_ID}...`);
+    
     const guild = await client.guilds.fetch(GUILD_ID);
-    console.log('Servidor encontrado:', guild.name);
+    if (!guild) throw new Error('Servidor não encontrado.');
 
     const member = await guild.members.fetch(USER_ID);
-    console.log('Status do membro:', member.presence?.status);
+    if (!member) throw new Error('Membro não encontrado.');
 
     const isOnline = member.presence?.status === 'online';
+    const statusMessage = isOnline ? '🟢 Online' : '🔴 Offline';
+
+    console.log(`[SUCESSO] Status de ${member.user.tag}: ${statusMessage}`);
 
     res.json({
-      message: `FuncZero está ${isOnline ? 'online' : 'offline'}`,
-      online: isOnline,
+      message: `FuncZero está ${statusMessage}`,
+      username: member.user.tag,
+      id: member.user.id,
+      status: isOnline ? 'online' : 'offline',
     });
   } catch (error) {
-    console.error('Erro ao obter status do usuário:', error.message);
-    res.status(500).json({ error: 'Erro ao obter status do usuário' });
+    console.error('[ERRO] Falha ao obter status:', error.message);
+    res.status(500).json({ error: 'Erro ao obter status do usuário.' });
   }
 });
 
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
-
-client.once('ready', () => {
-  console.log(`Bot está online como ${client.user.tag}`);
-  
-  client.user.setPresence({
-    status: 'dnd',
-    activities: [
-      {
-        name: 'https://funczero.xyz',
-        type: 'WATCHING',
-      },
-    ],
-  });
-
-  console.log('Status do bot configurado para "Assistindo: https://funczero.xyz".');
+app.listen(PORT, () => {
+  console.log(`[INFO] Servidor rodando na porta ${PORT}`);
 });
 
-client.login(process.env.TOKEN);
+client.once('ready', () => {
+  console.log(`[INFO] Bot está online como ${client.user.tag}`);
+});
+
+client.login(process.env.DISCORD_TOKEN);
